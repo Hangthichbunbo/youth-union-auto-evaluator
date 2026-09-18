@@ -27,6 +27,10 @@ Nếu trình duyệt hiển thị cảnh báo bảo mật màu vàng `Warning: D
 2. Dán mã vào tab **Console**.
 3. Nhấn **Enter** và để script tự động thực thi.
 
+### Bước 4: Kiểm tra lại điểm và nộp lên trên (phần kiểm tra này thì vẫn cần con người cho chắc chắn:)) )
+1. Kiểm tra điểm đã phù hợp chưa (vì là tool chấm ngẫu nhiên điểm nên nếu chưa hài lòng hãy sửa lại)
+2. Tích tất cả các đoàn viên
+3. Nhấn **Chuyển cấp trên** và để hoàn thành.
 ---
 
 ## Lưu Ý Trong Quá Trình Chạy
