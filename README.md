@@ -36,5 +36,3 @@ Nếu trình duyệt hiển thị cảnh báo bảo mật màu vàng `Warning: D
 
 ---
 
-## Tác Giả
-* Phát triển bởi Đoàn thanh niên CNTT / Chi đoàn ứng dụng.
