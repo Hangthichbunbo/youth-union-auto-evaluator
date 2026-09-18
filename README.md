@@ -23,7 +23,7 @@ Nếu trình duyệt hiển thị cảnh báo bảo mật màu vàng `Warning: D
 2. Nhấn **Enter**.
 
 ### Bước 3: Chạy Script Tự Động
-1. Sao chép toàn bộ mã trong file `main.js` (hoặc `script.js`).
+1. Sao chép toàn bộ mã trong file `script.js`.
 2. Dán mã vào tab **Console**.
 3. Nhấn **Enter** và để script tự động thực thi.
 
