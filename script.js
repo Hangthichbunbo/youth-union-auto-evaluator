@@ -1,11 +1,18 @@
-(async function runCompleteProcess() {
+(async function runFullWorkflow() {
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   function triggerClick(el) {
     if (!el) return false;
-    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    return true;
+    try {
+      const opts = { bubbles: true, cancelable: true, view: window };
+      el.dispatchEvent(new MouseEvent('mousedown', opts));
+      el.dispatchEvent(new MouseEvent('mouseup', opts));
+      el.dispatchEvent(new MouseEvent('click', opts));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function setInputValue(input, value) {
@@ -32,10 +39,9 @@
     return null;
   }
 
-  // Hàm tạo điểm hợp lệ: Giới hạn mỗi nhóm < 20 điểm và tổng 5 nhóm đạt 77-88 điểm
   function generateValidScores() {
     function distributeGroup(count, maxTotal) {
-      let arr = Array(count).fill(2); // Mỗi ô tối thiểu 2 điểm
+      let arr = Array(count).fill(2);
       let current = count * 2;
       while (current < maxTotal) {
         let idx = Math.floor(Math.random() * count);
@@ -46,25 +52,57 @@
       }
       return arr;
     }
-
-    // Tải trọng điểm cho 5 nhóm (7 mục, 6 mục, 5 mục, 4 mục, 4 mục)
-    const g1 = distributeGroup(7, Math.floor(Math.random() * 4) + 15); // 15 - 18 điểm
-    const g2 = distributeGroup(6, Math.floor(Math.random() * 4) + 15); // 15 - 18 điểm
-    const g3 = distributeGroup(5, Math.floor(Math.random() * 4) + 15); // 15 - 18 điểm
-    const g4 = distributeGroup(4, Math.floor(Math.random() * 4) + 13); // 13 - 16 điểm
-    const g5 = distributeGroup(4, Math.floor(Math.random() * 4) + 13); // 13 - 16 điểm
-
+    const g1 = distributeGroup(7, Math.floor(Math.random() * 4) + 15);
+    const g2 = distributeGroup(6, Math.floor(Math.random() * 4) + 15);
+    const g3 = distributeGroup(5, Math.floor(Math.random() * 4) + 15);
+    const g4 = distributeGroup(4, Math.floor(Math.random() * 4) + 13);
+    const g5 = distributeGroup(4, Math.floor(Math.random() * 4) + 13);
     return [...g1, ...g2, ...g3, ...g4, ...g5];
   }
 
-  // 1. CHỌN LỌC TRẠNG THÁI "CHƯA ĐĂNG KÝ"
-  console.log("[AUTO] Bắt đầu thao tác lọc...");
-  const tabRegister = Array.from(document.querySelectorAll('div, button, a, span, .ant-tabs-tab')).find(el => el.innerText?.trim() === 'Đăng ký rèn luyện');
-  if (tabRegister) {
-    triggerClick(tabRegister);
-    await sleep(1500);
+  // BƯỚC 1: DUYỆT THÔNG TIN ĐOÀN VIÊN (NẾU ĐANG Ở TRANG DUYỆT)
+  if (window.location.href.includes('duyet-thong-tin')) {
+    console.log("[AUTO] Đang duyệt thông tin đoàn viên...");
+    let hasNext = true;
+    while (hasNext) {
+      const getBtns = () => Array.from(document.querySelectorAll('a, button, span, i')).filter(el => el.innerText?.trim() === 'Duyệt' && el.offsetWidth > 0);
+      let btns = getBtns();
+
+      for (let i = 0; i < btns.length; i++) {
+        let currentBtns = getBtns();
+        if (!currentBtns.length) break;
+
+        triggerClick(currentBtns[0]);
+        await sleep(800);
+
+        let confirmBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.toUpperCase().includes('DUYỆT'));
+        if (confirmBtn) {
+          triggerClick(confirmBtn);
+        }
+        await sleep(1500);
+      }
+
+      const nextBtn = document.querySelector('.ant-pagination-next:not(.ant-pagination-disabled), li[title="Next Page"]:not(.ant-pagination-disabled), .pagination .next');
+      if (nextBtn && !nextBtn.classList.contains('ant-pagination-disabled')) {
+        triggerClick(nextBtn.querySelector('a, button') || nextBtn);
+        await sleep(3000);
+      } else {
+        hasNext = false;
+      }
+    }
+
+    console.log("[AUTO] Duyệt hoàn tất! Tự động chuyển hướng sang trang Chương trình rèn luyện...");
+    sessionStorage.setItem('AUTO_RUN_NEXT', 'true');
+    window.location.href = 'https://quanlydoanvien.doanthanhnien.vn/chuong-trinh-ren-luyen';
+    return;
   }
 
+  // BƯỚC 2: TỰ ĐỘNG THỰC HIỆN KHI SANG TRANG RÈN LUYỆN
+  console.log("[AUTO] Đã vào trang Chương trình rèn luyện. Đang khởi chạy quy trình...");
+  sessionStorage.removeItem('AUTO_RUN_NEXT');
+  await sleep(2000);
+
+  console.log("[AUTO] Bắt đầu lọc trạng thái Chưa đăng ký...");
   const selectBox = document.querySelector('nz-select[nzplaceholdersholder*="Trạng thái"], nz-select, .ant-select-selector');
   if (selectBox) {
     triggerClick(selectBox);
@@ -88,16 +126,16 @@
   if (searchBtn) {
     triggerClick(searchBtn);
     console.log("[AUTO] Đã bấm nút Tìm kiếm.");
-    await sleep(3000);
+    await sleep(4000);
   }
 
-  // 2. ĐĂNG KÝ RÈN LUYỆN NẾU CÓ DỮ LIỆU
-  let processRegister = true;
-  while (processRegister) {
-    const noData = document.body.innerText.includes('Không có dữ liệu') || document.querySelectorAll('tbody tr').length === 0;
+  // BƯỚC 3: ĐĂNG KÝ RÈN LUYỆN
+  while (true) {
+    const hasRows = document.querySelectorAll('tbody tr').length > 0;
+    const noData = document.body.innerText.includes('Không có dữ liệu') || !hasRows;
 
     if (noData) {
-      console.log("[AUTO] Kết quả: 'Không có dữ liệu' -> Chuyển sang Tab Đánh giá rèn luyện.");
+      console.log("[AUTO] Không có dữ liệu chưa đăng ký -> Chuyển sang Tab Đánh giá rèn luyện.");
       break;
     }
 
@@ -128,19 +166,19 @@
 
       if (searchBtn) {
         triggerClick(searchBtn);
-        await sleep(2500);
+        await sleep(3000);
       }
     } else {
-      processRegister = false;
+      break;
     }
   }
 
-  // 3. ĐÁNH GIÁ RÈN LUYỆN VỚI ĐIỂM CHIA THEO NHÓM CHUẨN
+  // BƯỚC 4: ĐÁNH GIÁ RÈN LUYỆN
   console.log("[AUTO] Chuyển sang Tab Đánh giá rèn luyện...");
   const tabGrade = Array.from(document.querySelectorAll('div, button, a, span, .ant-tabs-tab')).find(el => el.innerText?.trim() === 'Đánh giá rèn luyện');
   if (tabGrade) {
     triggerClick(tabGrade);
-    await sleep(2500);
+    await sleep(3000);
   }
 
   while (true) {
@@ -167,7 +205,6 @@
           .filter(input => Math.abs(input.getBoundingClientRect().x - maxX) < 40)
           .sort((a, b) => a.getBoundingClientRect().y - b.getBoundingClientRect().y);
 
-        // Sinh mảng điểm đã kiểm soát trần 20 điểm/nhóm
         const validScores = generateValidScores();
 
         chiDoanInputs.forEach((input, index) => {
