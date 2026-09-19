@@ -4,48 +4,50 @@
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Hàm sinh mảng 26 điểm thỏa mãn: Tổng 70-85 và từng nhóm < 20 điểm
+  // Hàm sinh mảng 26 điểm thỏa mãn: Tổng 70-85 và MỌI NHÓM LUÔN <= 18 ĐIỂM (An toàn tuyệt đối < 20)
   function generateValidScores() {
-    function distributeGroup(count, targetGroupScore) {
-      let arr = Array(count).fill(2); // Mỗi ô tối thiểu 2 điểm
-      let currentSum = count * 2;
-      while (currentSum < targetGroupScore) {
+    // Số tiêu chí của từng nhóm: [Nhóm 1, Nhóm 2, Nhóm 3, Nhóm 4, Nhóm 5]
+    const counts = [7, 6, 5, 4, 4];
+    
+    // Chọn ngẫu nhiên tổng điểm toàn bài từ 70 đến 85
+    const targetTotal = Math.floor(Math.random() * (85 - 70 + 1)) + 70;
+
+    // Khởi tạo điểm tối thiểu cho mỗi nhóm (mỗi ô ít nhất 2 điểm)
+    let groupTotals = counts.map(c => c * 2);
+    let currentSum = groupTotals.reduce((a, b) => a + b, 0);
+
+    // Điểm tối đa an toàn cho từng nhóm (Nhóm 1 tối đa 18p, Nhóm 4 & 5 tối đa 16p do chỉ có 4 ô)
+    const maxCaps = [18, 18, 18, 16, 16];
+
+    // Vòng lặp phân bổ ngẫu nhiên từng điểm cho tới khi đạt targetTotal
+    while (currentSum < targetTotal) {
+      let idx = Math.floor(Math.random() * 5);
+      if (groupTotals[idx] < maxCaps[idx]) {
+        groupTotals[idx]++;
+        currentSum++;
+      }
+    }
+
+    // Hàm rải điểm đều vào từng ô trong nhóm
+    function distributeGroup(count, totalGroupScore) {
+      let arr = Array(count).fill(2);
+      let sum = count * 2;
+      while (sum < totalGroupScore) {
         let idx = Math.floor(Math.random() * count);
         if (arr[idx] < 4) { // Mỗi câu tối đa 4 điểm
           arr[idx]++;
-          currentSum++;
+          sum++;
         }
       }
       return arr;
     }
 
-    // Chọn ngẫu nhiên tổng điểm toàn bài từ 70 đến 85
-    const targetTotal = Math.floor(Math.random() * (85 - 70 + 1)) + 70;
-
-    // Phân bổ điểm cho 5 nhóm (đảm bảo từng nhóm luôn <= 18 điểm, hợp lệ < 20)
-    // Nhóm 1: 7 mục, Nhóm 2: 6 mục, Nhóm 3: 5 mục, Nhóm 4: 4 mục, Nhóm 5: 4 mục
-    let g1Target = Math.floor(Math.random() * 4) + 14; // 14-17 điểm
-    let g2Target = Math.floor(Math.random() * 4) + 14; // 14-17 điểm
-    let g3Target = Math.floor(Math.random() * 4) + 13; // 13-16 điểm
-    let g4Target = Math.floor(Math.random() * 3) + 12; // 12-14 điểm
-
-    // Nhóm 5 nhận số điểm còn lại để đạt chính xác targetTotal
-    let g5Target = targetTotal - (g1Target + g2Target + g3Target + g4Target);
-
-    // Điều chỉnh nhẹ nếu g5Target ra ngoài khoảng an toàn (11 - 16 điểm)
-    if (g5Target < 11) {
-      g1Target -= (11 - g5Target);
-      g5Target = 11;
-    } else if (g5Target > 16) {
-      g1Target += (g5Target - 16);
-      g5Target = 16;
-    }
-
-    const g1 = distributeGroup(7, g1Target);
-    const g2 = distributeGroup(6, g2Target);
-    const g3 = distributeGroup(5, g3Target);
-    const g4 = distributeGroup(4, g4Target);
-    const g5 = distributeGroup(4, g5Target);
+    // Tạo mảng điểm chi tiết cho từng nhóm
+    const g1 = distributeGroup(counts[0], groupTotals[0]);
+    const g2 = distributeGroup(counts[1], groupTotals[1]);
+    const g3 = distributeGroup(counts[2], groupTotals[2]);
+    const g4 = distributeGroup(counts[3], groupTotals[3]);
+    const g5 = distributeGroup(counts[4], groupTotals[4]);
 
     return [...g1, ...g2, ...g3, ...g4, ...g5];
   }
