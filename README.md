@@ -5,7 +5,7 @@ Công cụ tự động hóa các thao tác trên hệ thống Quản lý Đoàn
 Script giúp tự động thực hiện toàn bộ quy trình:
 1. **Duyệt thông tin đoàn viên:** Duyệt toàn bộ danh sách chờ duyệt qua từng trang.
 2. **Đăng ký rèn luyện:** Lọc danh sách đoàn viên "Chưa đăng ký", tự động chọn tất cả và xác nhận đăng ký nội dung rèn luyện.
-3. **Đánh giá rèn luyện:** Tự động điền điểm ngẫu nhiên đạt tổng từ 77 - 88 điểm (được kiểm soát hợp lệ < 20 điểm/nhóm nội dung để không vi phạm quy định hệ thống), tự động điền ghi chú "Hoàn thành tốt" và lưu kết quả.
+3. **Đánh giá rèn luyện:** Tự động điền điểm ngẫu nhiên đạt tổng từ 70 - 88 điểm (được kiểm soát hợp lệ < 20 điểm/nhóm nội dung để không vi phạm quy định hệ thống), tự động điền ghi chú "Hoàn thành tốt" và lưu kết quả.
 
 ---
 
